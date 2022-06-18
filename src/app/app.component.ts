@@ -7,16 +7,18 @@ import { OAuthService } from 'angular-oauth2-oidc';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'cognito-multi-auth';
-
   private async setupOAuth() {
     this.oauthService.configure({
-      redirectUri: window.location.origin + "/index.html",
-      clientId: "spa-demo",
-      scope: "openid profile email voucher",
-      issuer: 'https://steyer-identity-server.azurewebsites.net/identity',
+      redirectUri: window.location.origin,
+      scope: "openid profile email",
+      strictDiscoveryDocumentValidation: false,
       oidc: true,
+      
+      issuer: 'https://accounts.google.com',
+      clientId: "336820793242-to5kpptve63os39t1vs06lje1o4epvl8.apps.googleusercontent.com",
+      // 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
     });
+    
     this.oauthService.setStorage(sessionStorage);
 
     await this.oauthService.loadDiscoveryDocumentAndLogin();
@@ -24,5 +26,16 @@ export class AppComponent {
 
   constructor(private oauthService: OAuthService) {
     this.setupOAuth();
+  }
+
+  get claimEntries(): [string, any][] {
+    if (this.oauthService.hasValidIdToken()) {
+      return Object.entries(this.oauthService.getIdentityClaims());
+    }
+    return [];
+  }
+
+  public logout() {
+    this.oauthService.logOut();
   }
 }

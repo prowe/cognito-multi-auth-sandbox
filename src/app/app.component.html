@@ -1,2 +1,11 @@
 
+<dl>
+  <div *ngFor="let entry of claimEntries">
+    <dt>{{ entry[0] }}</dt>
+    <dd>{{ entry[1] }}</dd>
+  </div>
+</dl>
+
+<button (click)="logout()">Logout</button>
+
 <router-outlet></router-outlet>
