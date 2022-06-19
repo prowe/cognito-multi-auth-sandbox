@@ -1,7 +1,97 @@
 Transform: AWS::Serverless-2016-10-31
 Description: Sandbox for experimenting with cognito multi-auth
+Parameters:
+  CognitoDomain:
+    Type: String
+    Default: auth.sandbox-dev.sourceallies.com
+
 Resources:
-  DataBucket:
-    Type: AWS::S3::Bucket
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 6
+          RequireLowercase: false
+          RequireNumbers: false
+          RequireSymbols: false
+          RequireUppercase: false
+
+  Certificate:
+    Type: "AWS::CertificateManager::Certificate"
+    Properties: 
+      DomainName: !Ref CognitoDomain
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref CognitoDomain
+          HostedZoneId: Z328FCPUJ05W9K
+
+  RootDomainARecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: Z328FCPUJ05W9K
+      Name: sandbox-dev.sourceallies.com
+      Type: A
+      TTL: 60
+      ResourceRecords:
+        - 127.0.0.1
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain 
+    Properties:
+      UserPoolId: !Ref UserPool
+      Domain: !Ref CognitoDomain
+      CustomDomainConfig: 
+        CertificateArn: !Ref Certificate
+
+  UserPoolDNS:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: Z328FCPUJ05W9K
+      Name: !Ref CognitoDomain
+      Type: A
+      AliasTarget:
+        # It would be great if there was a way to get this from the domain
+        DNSName: dh0gg716mbil.cloudfront.net
+        HostedZoneId: Z2FDTNDATAQYW2 #this is always this value for cloudfront
+
+  GoogleIdentityProvider:
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Properties:
+      UserPoolId: !Ref UserPool
+      ProviderName: "Google"
+      ProviderType: "Google"
+      ProviderDetails:
+        client_id: "336820793242-to5kpptve63os39t1vs06lje1o4epvl8.apps.googleusercontent.com"
+        client_secret: "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"
+        authorize_scopes: "profile email openid"
+      AttributeMapping:
+        email: "email"
+
+  AngularExampleClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      ClientName: 'angular-example'
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows:
+        - code
+        - implicit
+      CallbackURLs:
+        - http://localhost:4200
+        - http://localhost:4200/index.html
+      GenerateSecret: true
+      AllowedOAuthScopes:
+        - phone
+        - email
+        - openid
+        - profile
+      SupportedIdentityProviders:
+        - COGNITO
+        - Google
+
+Outputs:
+  UserPoolProviderUrl:
+    Value: !GetAtt UserPool.ProviderURL
 
   

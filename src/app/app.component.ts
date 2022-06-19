@@ -14,8 +14,13 @@ export class AppComponent {
       strictDiscoveryDocumentValidation: false,
       oidc: true,
       
-      issuer: 'https://accounts.google.com',
-      clientId: "336820793242-to5kpptve63os39t1vs06lje1o4epvl8.apps.googleusercontent.com",
+      responseType: 'code',
+      issuer: 'https://cognito-idp.us-east-1.amazonaws.com/us-east-1_huQRHNw3K',
+      clientId: '5afmpt6r43bibig2ujj5giood2',
+      dummyClientSecret: '1m8gndff73jq6slq5e0opkjcmde4m1i0852fn92qv08vqhhnn7gu',
+
+      // issuer: 'https://accounts.google.com',
+      // clientId: "336820793242-to5kpptve63os39t1vs06lje1o4epvl8.apps.googleusercontent.com",
       // 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
     });
     
